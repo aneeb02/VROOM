@@ -7,7 +7,6 @@ import { Ionicons } from "@expo/vector-icons";
 import { AuthContext } from "./AuthContext"; 
 import { OBDProvider } from "./OBDContext"; 
 
- 
 import LoginScreen from "../screens/LoginScreen";
 import SignupScreen from "../screens/SignupScreen";
 import DashboardScreen from "../screens/DashboardScreen";
@@ -22,8 +21,10 @@ import ScanScreen from "../screens/ScanScreen";
 import HistoryScreen from "../screens/HistoryScreen";
 import DTCDetailScreen from "../screens/DTCDetailScreen";
 import AnomaliesScreen from "../screens/AnomaliesScreen";
-import DeviceSelectionScreen from "../screens/DeviceSelectionScreen"; // <--- NEW IMPORT
-
+import DeviceSelectionScreen from "../screens/DeviceSelectionScreen";
+import TireAnalysisScreen from "../screens/TireAnalysisScreen";
+import AIAssistantScreen from "../screens/AIAssistantScreen";
+import OilChangeScreen from "../screens/OilChangeScreen";
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -33,9 +34,9 @@ function DashboardStack() {
     return (
         <Stack.Navigator
             screenOptions={{
-                headerStyle: { backgroundColor: "#1a1a1a" },
+                headerStyle: { backgroundColor: "#020617" },
                 headerTintColor: "#fff",
-                headerTitleStyle: { fontWeight: "700" },
+                headerTitleStyle: { fontFamily: "SpaceGrotesk_700Bold" },
             }}
         >
             <Stack.Screen
@@ -43,10 +44,16 @@ function DashboardStack() {
                 component={DashboardScreen}
                 options={{ headerShown: false }}
             />
-            <Stack.Screen 
+            <Stack.Screen   
                 name="DeviceSelection" 
-                component={DeviceSelectionScreen} // <--- NEW SCREEN
+                component={DeviceSelectionScreen}
+                options={{ headerShown: true }}
             />
+            <Stack.Screen   
+                name="TireAnalysis" 
+                component={TireAnalysisScreen}
+            />
+            <Stack.Screen name="OilChange" component={OilChangeScreen} />
             <Stack.Screen name="Anomalies" component={AnomaliesScreen} />
             <Stack.Screen name="Scan" component={ScanScreen} />
         </Stack.Navigator>
@@ -58,9 +65,9 @@ function DiagnosticsStack() {
     return (
         <Stack.Navigator
             screenOptions={{
-                headerStyle: { backgroundColor: "#1a1a1a" },
+                headerStyle: { backgroundColor: "#020617" },
                 headerTintColor: "#fff",
-                headerTitleStyle: { fontWeight: "700" },
+                headerTitleStyle: { fontFamily: "SpaceGrotesk_700Bold" },
             }}
         >
             <Stack.Screen
@@ -73,6 +80,11 @@ function DiagnosticsStack() {
                 component={DTCDetailScreen}
                 options={{ title: "DTC Details" }}
             />
+            <Stack.Screen
+                name="TireAnalysis"
+                component={TireAnalysisScreen}
+                options={{ title: "Tire Analysis" }}
+            />
         </Stack.Navigator>
     );
 }
@@ -82,9 +94,9 @@ function MechanicsStack() {
     return (
         <Stack.Navigator
             screenOptions={{
-                headerStyle: { backgroundColor: "#1a1a1a" },
+                headerStyle: { backgroundColor: "#020617" },
                 headerTintColor: "#fff",
-                headerTitleStyle: { fontWeight: "700" },
+                headerTitleStyle: { fontFamily: "SpaceGrotesk_700Bold" },
             }}
         >
             <Stack.Screen
@@ -101,14 +113,14 @@ function AssistantStack() {
     return (
         <Stack.Navigator
             screenOptions={{
-                headerStyle: { backgroundColor: "#1a1a1a" },
+                headerStyle: { backgroundColor: "#020617" },
                 headerTintColor: "#fff",
-                headerTitleStyle: { fontWeight: "700" },
+                headerTitleStyle: { fontFamily: "SpaceGrotesk_700Bold" },
             }}
         >
             <Stack.Screen
                 name="AssistantHome"
-                component={AssistantScreen}
+                component={AIAssistantScreen}
                 options={{ headerShown: false }}
             />
         </Stack.Navigator>
@@ -120,15 +132,15 @@ function ProfileStack() {
     return (
         <Stack.Navigator
             screenOptions={{
-                headerStyle: { backgroundColor: "#1a1a1a" },
+                headerStyle: { backgroundColor: "#020617" },
                 headerTintColor: "#fff",
-                headerTitleStyle: { fontWeight: "700" },
+                headerTitleStyle: { fontFamily: "SpaceGrotesk_700Bold" },
             }}
         >
             <Stack.Screen
                 name="ProfileHome"
                 component={ProfileScreen}
-                options={{ title: "Profile" }}
+                options={{ headerShown: false }}
             />
             <Stack.Screen
                 name="MyVehicles"
@@ -177,19 +189,20 @@ function MainTabs() {
                     // Ionicons is imported from @expo/vector-icons
                     return <Ionicons name={iconName} size={size} color={color} />;
                 },
-                tabBarActiveTintColor: "#FFC107",
-                tabBarInactiveTintColor: "#666",
+                tabBarActiveTintColor: "#FACC15",
+                tabBarInactiveTintColor: "#6b7280",
                 tabBarStyle: {
-                    backgroundColor: "#1a1a1a",
-                    borderTopColor: "#3a3a3a",
+                    backgroundColor: "#020617",
+                    borderTopColor: "#1f2937",
                     borderTopWidth: 1,
-                    paddingBottom: 5,
+                    paddingBottom: 5, // Reverted
                     paddingTop: 5,
-                    height: 60,
+                    height: 60, // Reverted
                 },
                 tabBarLabelStyle: {
                     fontSize: 11,
-                    fontWeight: "600",
+                    fontFamily: "SpaceGrotesk_700Bold",
+                    marginBottom: 0,
                 },
             })}
         >

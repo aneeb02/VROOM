@@ -1,0 +1,17 @@
+fastapi
+uvicorn
+sqlalchemy
+asyncpg
+pydantic
+pydantic-settings
+langchain
+langchain-community
+langchain-huggingface
+sentence-transformers
+groq
+python-dotenv
+torch
+transformers
+tqdm
+pytest
+pytest-asyncio

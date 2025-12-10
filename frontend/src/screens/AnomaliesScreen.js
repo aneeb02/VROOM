@@ -31,36 +31,37 @@ export default function AnomaliesScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#1a1a1a",
+    backgroundColor: "#020617", // Updated background
     padding: 20,
   },
   title: {
     fontSize: 24,
-    fontWeight: "700",
     color: "#fff",
     marginBottom: 20,
+    fontFamily: "SpaceGrotesk_700Bold",
   },
   card: {
-    backgroundColor: "#2a2a2a",
+    backgroundColor: "#111827", // Updated card background
     borderRadius: 12,
     padding: 16,
     flexDirection: "row",
     justifyContent: "space-between",
     borderWidth: 1,
-    borderColor: "#3a3a3a",
+    borderColor: "#1f2937", // Updated border
   },
   cardLeft: {
     flex: 1,
   },
   cardTitle: {
     fontSize: 16,
-    fontWeight: "600",
     color: "#fff",
     marginBottom: 8,
+    fontFamily: "SpaceGrotesk_700Bold",
   },
   cardTime: {
     fontSize: 13,
-    color: "#999",
+    color: "#9ca3af", // Updated text color
+    fontFamily: "SpaceGrotesk_400Regular",
   },
   cardRight: {
     alignItems: "center",
@@ -70,7 +71,7 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     borderRadius: 30,
-    backgroundColor: "#3a3a3a",
+    backgroundColor: "#1f2937", // Updated gauge bg
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 8,
@@ -79,15 +80,15 @@ const styles = StyleSheet.create({
     fontSize: 28,
   },
   viewButton: {
-    backgroundColor: "#FFC107",
+    backgroundColor: "#FACC15", // Yellow accent
     paddingHorizontal: 20,
     paddingVertical: 8,
     borderRadius: 20,
   },
   viewButtonText: {
-    color: "#000",
-    fontWeight: "700",
+    color: "#020617",
     fontSize: 14,
+    fontFamily: "SpaceGrotesk_700Bold",
   },
   emptyState: {
     flex: 1,
@@ -95,7 +96,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   emptyText: {
-    color: "#666",
+    color: "#6b7280",
     fontSize: 16,
+    fontFamily: "SpaceGrotesk_400Regular",
   },
 });

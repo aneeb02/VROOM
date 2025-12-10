@@ -1,8 +1,7 @@
 // api.js
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export const BASE = "https://rickey-planimetric-glimmeringly.ngrok-free.dev";
-
+export const BASE = "https://lavina-oilfired-possessively.ngrok-free.dev";
 
 async function getToken() {
   try {

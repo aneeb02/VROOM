@@ -2,6 +2,7 @@ import React, { createContext, useState, useRef, useEffect, useCallback } from '
 import { BleManager } from 'react-native-ble-plx';
 import base64 from 'react-native-base64'; 
 import { Buffer } from 'buffer'; 
+import { PermissionsAndroid, Platform } from 'react-native';
 
 export const OBDContext = createContext();
 
@@ -52,6 +53,47 @@ export function OBDProvider({ children }) {
         }
     }, [device, addLog]);
 
+
+    const requestAndroidPermissions = async () => {
+    if (Platform.OS === 'android') {
+        const apiLevel = Platform.Version; // This should be retrieved correctly in a real RN app
+
+        // BLUETOOTH_SCAN/CONNECT are needed for API 31+
+        if (apiLevel >= 31) { 
+            const permissionsToRequest = [
+                PermissionsAndroid.PERMISSIONS.BLUETOOTH_SCAN,
+                PermissionsAndroid.PERMISSIONS.BLUETOOTH_CONNECT,
+                PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION, // Still needed for discovery
+            ];
+
+            const results = await PermissionsAndroid.requestMultiple(permissionsToRequest);
+            
+            if (results['android.permission.BLUETOOTH_SCAN'] === PermissionsAndroid.RESULTS.GRANTED &&
+                results['android.permission.BLUETOOTH_CONNECT'] === PermissionsAndroid.RESULTS.GRANTED &&
+                results['android.permission.ACCESS_FINE_LOCATION'] === PermissionsAndroid.RESULTS.GRANTED) {
+                addLog('All Android BLE permissions granted.');
+                return true;
+            } else {
+                addLog('Permission denied. Cannot scan.');
+                return false;
+            }
+        } 
+        // For older Android versions (API < 31), only ACCESS_FINE_LOCATION is required for scanning
+        else {
+             const granted = await PermissionsAndroid.request(
+                 PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
+             );
+             if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+                 addLog('Location permission granted (legacy Android).');
+                 return true;
+             }
+             addLog('Location permission denied.');
+             return false;
+        }
+    }
+    return true; // Assume success for non-Android platforms
+};
+
     // -------------------------
     // Scan for devices
     // -------------------------
@@ -62,7 +104,12 @@ export function OBDProvider({ children }) {
             addLog('Scan stopped.');
             return;
         }
-
+        const permissionGranted = await requestAndroidPermissions();
+        if (!permissionGranted) {
+            setIsScanning(false);
+            addLog('Cannot start scan: Permissions not granted.');
+            return;
+        }
         setIsScanning(true);
         addLog('Scanning for BLE OBD devices...');
         setScannedDevices({});

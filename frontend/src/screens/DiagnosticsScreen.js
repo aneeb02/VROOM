@@ -1,20 +1,34 @@
+// src/screens/DiagnosticsScreen.js
 import React, { useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, FlatList } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  FlatList,
+} from "react-native";
 
-export default function DiagnosticsScreen({ navigation }) {
+function DiagnosticsScreen({ navigation, route }) {
   const [activeTab, setActiveTab] = useState("dtc");
 
-  const dtcCodes = [
-    { id: "1", code: "P0301", description: "Engine Control Module (ECM)", active: true },
-    { id: "2", code: "P0700", description: "Transmission Control Module (TCM)", active: true },
-    { id: "3", code: "C1234", description: "Anti-lock Brake System (ABS)", active: true },
-    { id: "4", code: "B0100", description: "Supplemental Restraint System (SRS)", active: true },
+  const defaultDtcCodes = [
+    { id: "1", code: "P0301", description: "P0301 Engine Control Module (ECM)", active: true },
+    { id: "2", code: "P0700", description: "P0700 Transmission Control Module (TCM)", active: true },
+    { id: "3", code: "P0019", description: "P0019 - Crankshaft Position - Camshaft Position Correlation (Bank 2 Sensor B)", active: true },
+    { id: "4", code: "P001A", description: "P001A A Camshaft Profile Control Circuit/Open Bank 1", active: true },
   ];
 
+  const dtcCodes = route?.params?.dtcCodes || defaultDtcCodes;
+
   const renderDTCItem = ({ item }) => (
-    <TouchableOpacity 
+    <TouchableOpacity
       style={styles.dtcItem}
-      onPress={() => navigation.navigate('DTCDetail', { code: item.code })}
+      onPress={() =>
+        navigation.navigate("DTCDetail", {
+          code: item.code,
+          description: item.description,
+        })
+      }
     >
       <View style={styles.dtcInfo}>
         <Text style={styles.dtcCode}>{item.code}</Text>
@@ -36,6 +50,7 @@ export default function DiagnosticsScreen({ navigation }) {
             DTC Scan Results
           </Text>
         </TouchableOpacity>
+
         <TouchableOpacity
           style={[styles.tab, activeTab === "live" && styles.tabActive]}
           onPress={() => setActiveTab("live")}
@@ -46,7 +61,6 @@ export default function DiagnosticsScreen({ navigation }) {
         </TouchableOpacity>
       </View>
 
-      {/* Content */}
       {activeTab === "dtc" ? (
         <>
           <FlatList
@@ -55,9 +69,7 @@ export default function DiagnosticsScreen({ navigation }) {
             keyExtractor={(item) => item.id}
             contentContainerStyle={styles.list}
           />
-          <TouchableOpacity style={styles.explainButton}>
-            <Text style={styles.explainButtonText}>Explain</Text>
-          </TouchableOpacity>
+          
         </>
       ) : (
         <View style={styles.emptyState}>
@@ -68,15 +80,20 @@ export default function DiagnosticsScreen({ navigation }) {
   );
 }
 
+export default DiagnosticsScreen;
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#1a1a1a",
+    backgroundColor: "#020617",
   },
+
+  // Tabs
   tabContainer: {
     flexDirection: "row",
     borderBottomWidth: 1,
-    borderBottomColor: "#3a3a3a",
+    borderBottomColor: "#1f2937",
+    backgroundColor: "#020617",
   },
   tab: {
     flex: 1,
@@ -85,21 +102,23 @@ const styles = StyleSheet.create({
   },
   tabActive: {
     borderBottomWidth: 2,
-    borderBottomColor: "#FFC107",
+    borderBottomColor: "#FACC15",
   },
   tabText: {
-    color: "#999",
+    color: "#6b7280",
     fontSize: 14,
-    fontWeight: "600",
+    fontFamily: "SpaceGrotesk_700Bold",
   },
   tabTextActive: {
-    color: "#fff",
+    color: "#f9fafb",
   },
+
+  // DTC list
   list: {
     padding: 16,
   },
   dtcItem: {
-    backgroundColor: "#2a2a2a",
+    backgroundColor: "#020617",
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
@@ -107,32 +126,33 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     borderWidth: 1,
-    borderColor: "#3a3a3a",
+    borderColor: "#111827",
   },
   dtcInfo: {
     flex: 1,
   },
   dtcCode: {
     fontSize: 18,
-    fontWeight: "700",
-    color: "#fff",
+    color: "#f9fafb",
     marginBottom: 4,
+    fontFamily: "SpaceGrotesk_700Bold",
   },
   dtcDesc: {
     fontSize: 13,
-    color: "#999",
+    color: "#9ca3af",
+    fontFamily: "SpaceGrotesk_400Regular",
   },
   statusDot: {
     width: 12,
     height: 12,
     borderRadius: 6,
-    backgroundColor: "#666",
+    backgroundColor: "#4b5563",
   },
   statusActive: {
-    backgroundColor: "#4ade80",
+    backgroundColor: "#22c55e",
   },
   explainButton: {
-    backgroundColor: "#FFC107",
+    backgroundColor: "#FACC15",
     margin: 16,
     padding: 16,
     borderRadius: 12,
@@ -140,8 +160,8 @@ const styles = StyleSheet.create({
   },
   explainButtonText: {
     fontSize: 16,
-    fontWeight: "700",
     color: "#000",
+    fontFamily: "SpaceGrotesk_700Bold",
   },
   emptyState: {
     flex: 1,
@@ -149,7 +169,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   emptyText: {
-    color: "#666",
+    color: "#6b7280",
     fontSize: 16,
+    fontFamily: "SpaceGrotesk_400Regular",
   },
 });

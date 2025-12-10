@@ -1,63 +1,29 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { 
     View, 
     Text, 
     StyleSheet, 
     FlatList, 
-    ScrollView, 
     TouchableOpacity, 
-    ActivityIndicator 
+    Image,
+    ActivityIndicator,
+    SafeAreaView
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { OBDContext } from '../navigation/OBDContext';
-
-const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#1a1a1a', paddingHorizontal: 20 },
-    header: { paddingVertical: 20, borderBottomWidth: 1, borderBottomColor: '#3a3a3a' },
-    title: { fontSize: 24, fontWeight: 'bold', color: '#fff', marginBottom: 5 },
-    subtitle: { color: '#999', fontSize: 14 },
-    list: { flex: 1, paddingVertical: 10 },
-    deviceItem: { 
-        backgroundColor: '#2a2a2a', 
-        padding: 15, 
-        borderRadius: 12, 
-        marginBottom: 10,
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center'
-    },
-    deviceName: { color: '#fff', fontSize: 16, fontWeight: '600' },
-    deviceId: { color: '#999', fontSize: 12 },
-    logArea: { marginTop: 20, backgroundColor: '#2a2a2a', padding: 10, borderRadius: 8, height: 150 },
-    logTitle: { color: '#FFC107', fontWeight: 'bold', marginBottom: 5 },
-    logText: { color: '#ddd', fontSize: 10 },
-    connectButton: { padding: 10, borderRadius: 8, minWidth: 90, alignItems: 'center' },
-    connectButtonText: { color: '#fff', fontWeight: 'bold', fontSize: 12 },
-    scanButton: { 
-        backgroundColor: '#FFC107', 
-        padding: 15, 
-        borderRadius: 12, 
-        alignItems: 'center', 
-        marginTop: 20, 
-        marginBottom: 10,
-        flexDirection: 'row',
-        justifyContent: 'center',
-    },
-    scanButtonText: { color: '#1a1a1a', fontWeight: 'bold', fontSize: 16 },
-    emptyText: { color: '#999', textAlign: 'center', marginTop: 30 },
-});
 
 export default function DeviceSelectionScreen({ navigation }) {
     const { 
         scannedDevices, 
         isScanning, 
         isConnected,
-        log,
         scanForDevices, 
         connectToDevice,
-        device 
+        device,
+        disconnectDevice // Assuming this exists or we simulate it
     } = useContext(OBDContext);
+
+    const [connectingId, setConnectingId] = useState(null);
 
     const devicesArray = Object.values(scannedDevices).sort((a, b) => 
         (a.name || 'Unknown').localeCompare(b.name || 'Unknown')
@@ -67,90 +33,270 @@ export default function DeviceSelectionScreen({ navigation }) {
         if (!isConnected) scanForDevices();
     }, []);
 
-    useEffect(() => {
-        navigation.setOptions({
-            title: 'Select OBD Adapter',
-            headerRight: () => isConnected ? (
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <Ionicons name="wifi" size={24} color="#4CAF50" />
-                    <Text style={{ color: '#4CAF50', marginLeft: 5, fontWeight: 'bold' }}>Connected</Text>
-                </View>
-            ) : null
-        });
-    }, [isConnected, navigation]);
+    const handleConnect = async (item) => {
+        setConnectingId(item.id);
+        await connectToDevice(item);
+        setConnectingId(null);
+    };
 
     const renderDeviceItem = ({ item }) => {
-        const isCurrentDevice = item.id === device?.id;
-        const buttonColor = isCurrentDevice ? '#4CAF50' : '#03A9F4';
-        const buttonText = isCurrentDevice ? 'Connected' : 'Connect';
+        const isConnectedDevice = item.id === device?.id;
+        const isConnecting = connectingId === item.id;
 
         return (
-            <View style={styles.deviceItem}>
-                <View style={{ flex: 1, marginRight: 10 }}>
-                    <Text style={styles.deviceName}>{item.name || 'Unknown Device'}</Text>
-                    <Text style={styles.deviceId}>{item.id}</Text>
+            <TouchableOpacity 
+                style={[styles.deviceItem, isConnectedDevice && styles.deviceItemConnected]}
+                onPress={() => handleConnect(item)}
+                disabled={isConnectedDevice || isConnecting}
+            >
+                <View style={styles.deviceIconBox}>
+                    <Ionicons name="bluetooth" size={20} color="#9ca3af" />
                 </View>
-                <TouchableOpacity 
-                    style={[styles.connectButton, { backgroundColor: buttonColor }]} 
-                    onPress={() => {
-                        if (!isCurrentDevice) {
-                            scanForDevices(true); 
-                            connectToDevice(item);
-                        }
-                    }}
-                    disabled={isCurrentDevice}
-                >
-                    <Text style={styles.connectButtonText}>
-                        {buttonText}
+                <View style={styles.deviceInfo}>
+                    <Text style={styles.deviceName}>{item.name || 'Unknown Device'}</Text>
+                    <Text style={styles.deviceStatus}>
+                        {isConnectedDevice ? 'Connected' : isConnecting ? 'Connecting...' : 'Tap to pair'}
                     </Text>
-                </TouchableOpacity>
-            </View>
+                </View>
+                {isConnectedDevice && (
+                    <Ionicons name="checkmark-circle" size={24} color="#FACC15" />
+                )}
+                {isConnecting && (
+                    <ActivityIndicator size="small" color="#FACC15" />
+                )}
+            </TouchableOpacity>
         );
     };
 
     return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: '#1a1a1a' }}>
-            <View style={styles.container}>
-                <View style={styles.header}>
-                    <Text style={styles.title}>
-                        <Ionicons name="bluetooth" size={24} color="#FFC107" />
-                        {isScanning ? ' Scanning...' : ' Devices Found'}
-                    </Text>
-                    <Text style={styles.subtitle}>Tap 'Connect' to pair with your OBD adapter and start streaming data.</Text>
+        <SafeAreaView style={styles.container}>
+            <View style={styles.header}>
+                <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+                    <Ionicons name="arrow-back" size={24} color="#fff" />
+                </TouchableOpacity>
+                <Text style={styles.headerTitle}>Connect to your car</Text>
+                <View style={{ width: 24 }} />
+            </View>
+
+            <View style={styles.content}>
+                <Text style={styles.instructionText}>
+                    To get started, plug in your ELM327 OBD-II dongle and turn on your car's ignition.
+                </Text>
+
+                {/* Hero Image Placeholder */}
+                <View style={styles.heroContainer}>
+                    <View style={styles.heroCircle}>
+                        <Ionicons name="hardware-chip-outline" size={80} color="#64748b" />
+                    </View>
                 </View>
 
-                <TouchableOpacity
-                    style={styles.scanButton}
-                    onPress={() => isScanning ? scanForDevices(true) : scanForDevices()}
-                    disabled={isConnected}
-                >
-                    {isScanning && <ActivityIndicator size="small" color="#1a1a1a" style={{ marginRight: 10 }} />}
-                    <Text style={styles.scanButtonText}>
-                        {isScanning ? 'STOP SCANNING' : 'RESCAN FOR DEVICES'}
-                    </Text>
-                </TouchableOpacity>
+                <Text style={styles.sectionTitle}>Connection</Text>
 
-                <FlatList
-                    style={styles.list}
-                    data={devicesArray}
-                    keyExtractor={(item) => item.id}
-                    renderItem={renderDeviceItem}
-                    ListEmptyComponent={() => (
-                        <Text style={styles.emptyText}>
-                            {isScanning ? 'Searching for devices...' : 'No devices found. Ensure Bluetooth is on and the OBD adapter is powered.'}
-                        </Text>
+                <View style={styles.listContainer}>
+                    {isScanning && (
+                        <View style={styles.deviceItem}>
+                            <View style={styles.deviceIconBox}>
+                                <ActivityIndicator size="small" color="#FACC15" />
+                            </View>
+                            <View style={styles.deviceInfo}>
+                                <Text style={styles.deviceName}>Scanning...</Text>
+                                <Text style={styles.deviceStatus}>Searching for devices</Text>
+                            </View>
+                        </View>
                     )}
-                />
 
-                <View style={styles.logArea}>
-                    <Text style={styles.logTitle}>Connection Log</Text>
-                    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ justifyContent: 'flex-end' }}>
-                        {log.map((msg, index) => (
-                            <Text key={index} style={styles.logText}>{msg}</Text>
-                        ))}
-                    </ScrollView>
+                    <FlatList
+                        data={devicesArray}
+                        keyExtractor={(item) => item.id}
+                        renderItem={renderDeviceItem}
+                        contentContainerStyle={{ paddingBottom: 20 }}
+                        ListEmptyComponent={!isScanning && (
+                            <Text style={styles.emptyText}>No devices found. Try rescanning.</Text>
+                        )}
+                    />
+                </View>
+
+                {/* Connecting Progress (Visual Only for now if not tied to real progress) */}
+                {(connectingId || isScanning) && (
+                    <View style={styles.progressContainer}>
+                        <Text style={styles.progressLabel}>
+                            {connectingId ? 'Connecting...' : 'Scanning...'}
+                        </Text>
+                        <View style={styles.progressBarBg}>
+                            <View style={[styles.progressBarFill, { width: '40%' }]} />
+                        </View>
+                    </View>
+                )}
+
+                <View style={styles.footer}>
+                    <TouchableOpacity 
+                        style={styles.retryButton} 
+                        onPress={() => scanForDevices()}
+                        disabled={isScanning}
+                    >
+                        <Text style={styles.retryButtonText}>Retry</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity 
+                        style={styles.disconnectButton} 
+                        onPress={() => {
+                            // If we have a disconnect function, use it. 
+                            // Otherwise, we can just stop scanning or navigate back.
+                            if (disconnectDevice) disconnectDevice();
+                            navigation.goBack();
+                        }}
+                    >
+                        <Text style={styles.disconnectButtonText}>
+                            {isConnected ? 'Disconnect' : 'Cancel'}
+                        </Text>
+                    </TouchableOpacity>
                 </View>
             </View>
         </SafeAreaView>
     );
 }
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: '#020617',
+    },
+    header: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingHorizontal: 20,
+        paddingVertical: 15,
+    },
+    headerTitle: {
+        fontSize: 18,
+        color: '#fff',
+        fontFamily: 'SpaceGrotesk_700Bold',
+    },
+    content: {
+        flex: 1,
+        paddingHorizontal: 24,
+    },
+    instructionText: {
+        color: '#9ca3af',
+        fontSize: 14,
+        textAlign: 'center',
+        marginTop: 10,
+        marginBottom: 30,
+        fontFamily: 'SpaceGrotesk_400Regular',
+        lineHeight: 20,
+    },
+    heroContainer: {
+        alignItems: 'center',
+        marginBottom: 40,
+    },
+    heroCircle: {
+        width: 160,
+        height: 120,
+        borderRadius: 20,
+        backgroundColor: '#111827',
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: '#1f2937',
+    },
+    sectionTitle: {
+        fontSize: 16,
+        color: '#fff',
+        marginBottom: 12,
+        fontFamily: 'SpaceGrotesk_700Bold',
+    },
+    listContainer: {
+        flex: 1,
+    },
+    deviceItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#111827',
+        padding: 12,
+        borderRadius: 12,
+        marginBottom: 10,
+        borderWidth: 1,
+        borderColor: '#1f2937',
+    },
+    deviceItemConnected: {
+        borderColor: '#FACC15',
+        backgroundColor: '#1f2937',
+    },
+    deviceIconBox: {
+        width: 40,
+        height: 40,
+        borderRadius: 8,
+        backgroundColor: '#1f2937',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginRight: 12,
+    },
+    deviceInfo: {
+        flex: 1,
+    },
+    deviceName: {
+        color: '#fff',
+        fontSize: 16,
+        fontFamily: 'SpaceGrotesk_700Bold',
+    },
+    deviceStatus: {
+        color: '#9ca3af',
+        fontSize: 12,
+        fontFamily: 'SpaceGrotesk_400Regular',
+    },
+    emptyText: {
+        color: '#6b7280',
+        textAlign: 'center',
+        marginTop: 20,
+        fontFamily: 'SpaceGrotesk_400Regular',
+    },
+    progressContainer: {
+        marginBottom: 20,
+    },
+    progressLabel: {
+        color: '#fff',
+        fontSize: 14,
+        marginBottom: 8,
+        fontFamily: 'SpaceGrotesk_700Bold',
+    },
+    progressBarBg: {
+        height: 6,
+        backgroundColor: '#1f2937',
+        borderRadius: 3,
+        overflow: 'hidden',
+    },
+    progressBarFill: {
+        height: '100%',
+        backgroundColor: '#FACC15',
+    },
+    footer: {
+        flexDirection: 'row',
+        gap: 12,
+        marginBottom: 20,
+    },
+    retryButton: {
+        flex: 1,
+        backgroundColor: '#1f2937',
+        paddingVertical: 16,
+        borderRadius: 12,
+        alignItems: 'center',
+    },
+    retryButtonText: {
+        color: '#fff',
+        fontSize: 16,
+        fontFamily: 'SpaceGrotesk_700Bold',
+    },
+    disconnectButton: {
+        flex: 1,
+        backgroundColor: '#FACC15',
+        paddingVertical: 16,
+        borderRadius: 12,
+        alignItems: 'center',
+    },
+    disconnectButtonText: {
+        color: '#020617',
+        fontSize: 16,
+        fontFamily: 'SpaceGrotesk_700Bold',
+    },
+});

@@ -1,16 +1,16 @@
 import React, { useState, useContext } from "react";
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { AuthContext } from "../navigation/AuthContext"; //  import the context
-import * as Google from "expo-auth-session/providers/google";
-import { BASE } from "../navigation/api"; 
+import { AuthContext } from "../navigation/AuthContext";
+import { BASE } from "../navigation/api";
+import { Ionicons } from "@expo/vector-icons";
+
 export default function SignupScreen({ navigation }) {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  const { login } = useContext(AuthContext); //  use login from context
+  const { login } = useContext(AuthContext);
 
   const handleSignup = async () => {
     if (password !== confirmPassword) {
@@ -30,18 +30,13 @@ export default function SignupScreen({ navigation }) {
       });
 
       const data = await res.json();
-      console.log("Signup response:", data);
 
       if (res.ok) {
-        // ✅ build session
         const session = {
-          token: "dummy-token", // backend doesn’t create one yet
+          token: "dummy-token",
           user: data.user,
         };
-
-        // ✅ persist & update auth context
         await login(session);
-
         alert("Signup successful!");
       } else {
         alert(data.detail || data.error || "Signup failed");
@@ -57,12 +52,13 @@ export default function SignupScreen({ navigation }) {
       style={styles.container}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
-          <Text style={styles.logo}>VROOM</Text>
-          <TouchableOpacity style={styles.helpButton}>
-            <Text style={styles.helpText}>?</Text>
-          </TouchableOpacity>
+            <View style={{ width: 24 }} /> 
+            <Text style={styles.logo}>VROOM</Text>
+            <TouchableOpacity style={styles.helpButton}>
+                <Ionicons name="help-circle-outline" size={24} color="#fff" />
+            </TouchableOpacity>
         </View>
 
         <View style={styles.content}>
@@ -74,8 +70,7 @@ export default function SignupScreen({ navigation }) {
               style={styles.input}
               value={fullName}
               onChangeText={setFullName}
-              placeholder=""
-              placeholderTextColor="#666"
+              placeholderTextColor="#6b7280"
             />
 
             <Text style={styles.label}>Email address</Text>
@@ -83,8 +78,7 @@ export default function SignupScreen({ navigation }) {
               style={styles.input}
               value={email}
               onChangeText={setEmail}
-              placeholder=""
-              placeholderTextColor="#666"
+              placeholderTextColor="#6b7280"
               keyboardType="email-address"
               autoCapitalize="none"
             />
@@ -94,8 +88,7 @@ export default function SignupScreen({ navigation }) {
               style={styles.input}
               value={password}
               onChangeText={setPassword}
-              placeholder=""
-              placeholderTextColor="#666"
+              placeholderTextColor="#6b7280"
               secureTextEntry
             />
 
@@ -104,8 +97,7 @@ export default function SignupScreen({ navigation }) {
               style={styles.input}
               value={confirmPassword}
               onChangeText={setConfirmPassword}
-              placeholder=""
-              placeholderTextColor="#666"
+              placeholderTextColor="#6b7280"
               secureTextEntry
             />
 
@@ -114,12 +106,21 @@ export default function SignupScreen({ navigation }) {
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.googleButton}>
-              <Text style={styles.googleButtonText}>G Sign up with Google</Text>
+                <Ionicons name="logo-google" size={20} color="#fff" style={{ marginRight: 8 }} />
+                <Text style={styles.googleButtonText}>Sign up with Google</Text>
             </TouchableOpacity>
 
             <Text style={styles.terms}>
               By continuing, you agree to our Terms of Service and Privacy Policy.
             </Text>
+            
+            <View style={styles.loginContainer}>
+                <Text style={styles.loginText}>Already have an account? </Text>
+                <TouchableOpacity onPress={() => navigation.navigate("Login")}>
+                    <Text style={styles.loginLink}>Log in</Text>
+                </TouchableOpacity>
+            </View>
+
           </View>
         </View>
       </ScrollView>
@@ -128,33 +129,98 @@ export default function SignupScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#1a1a1a" },
+  container: { flex: 1, backgroundColor: "#020617" },
   scrollContent: { flexGrow: 1 },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     padding: 20,
+    marginTop: 20,
   },
-  logo: { fontSize: 24, fontWeight: "700", color: "#fff" },
+  logo: { 
+      fontSize: 16, 
+      color: "#fff", 
+      fontFamily: "SpaceGrotesk_700Bold",
+      letterSpacing: 1,
+  },
   helpButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    borderWidth: 2,
-    borderColor: "#fff",
     justifyContent: "center",
     alignItems: "center",
   },
-  helpText: { fontSize: 18, color: "#fff", fontWeight: "700" },
-  content: { flex: 1, justifyContent: "center", paddingHorizontal: 24 },
-  title: { fontSize: 28, fontWeight: "700", color: "#fff", marginBottom: 40, textAlign: "center" },
+  content: { flex: 1, justifyContent: "center", paddingHorizontal: 24, paddingBottom: 40 },
+  title: { 
+      fontSize: 28, 
+      color: "#fff", 
+      marginBottom: 32, 
+      textAlign: "center",
+      fontFamily: "SpaceGrotesk_700Bold",
+  },
   form: { width: "100%" },
-  label: { fontSize: 14, color: "#fff", marginBottom: 8, marginTop: 16 },
-  input: { backgroundColor: "#2a2a2a", borderRadius: 12, padding: 16, color: "#fff", fontSize: 16 },
-  createButton: { backgroundColor: "#FFC107", borderRadius: 12, padding: 16, alignItems: "center", marginTop: 24 },
-  createButtonText: { fontSize: 16, fontWeight: "700", color: "#000" },
-  googleButton: { backgroundColor: "#2a2a2a", borderRadius: 12, padding: 16, alignItems: "center", marginTop: 16 },
-  googleButtonText: { fontSize: 16, fontWeight: "600", color: "#fff" },
-  terms: { color: "#999", fontSize: 12, textAlign: "center", marginTop: 24 },
+  label: { 
+      fontSize: 14, 
+      color: "#9ca3af", 
+      marginBottom: 8, 
+      marginTop: 16,
+      fontFamily: "SpaceGrotesk_400Regular",
+  },
+  input: { 
+      backgroundColor: "#111827", 
+      borderRadius: 12, 
+      padding: 16, 
+      color: "#fff", 
+      fontSize: 16,
+      borderWidth: 1,
+      borderColor: "#1f2937",
+      fontFamily: "SpaceGrotesk_400Regular",
+  },
+  createButton: { 
+      backgroundColor: "#FACC15", 
+      borderRadius: 12, 
+      padding: 16, 
+      alignItems: "center", 
+      marginTop: 32,
+  },
+  createButtonText: { 
+      fontSize: 16, 
+      color: "#020617",
+      fontFamily: "SpaceGrotesk_700Bold",
+  },
+  googleButton: { 
+      backgroundColor: "#1f2937", 
+      borderRadius: 12, 
+      padding: 16, 
+      alignItems: "center", 
+      marginTop: 16,
+      flexDirection: "row",
+      justifyContent: "center",
+  },
+  googleButtonText: { 
+      fontSize: 16, 
+      color: "#fff",
+      fontFamily: "SpaceGrotesk_700Bold",
+  },
+  terms: { 
+      color: "#9ca3af", 
+      fontSize: 12, 
+      textAlign: "center", 
+      marginTop: 24,
+      fontFamily: "SpaceGrotesk_400Regular",
+      lineHeight: 18,
+  },
+  loginContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    marginTop: 20,
+  },
+  loginText: {
+    color: "#9ca3af",
+    fontSize: 14,
+    fontFamily: "SpaceGrotesk_400Regular",
+  },
+  loginLink: {
+    color: "#FACC15",
+    fontSize: 14,
+    fontFamily: "SpaceGrotesk_700Bold",
+  },
 });

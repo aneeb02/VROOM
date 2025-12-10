@@ -1,14 +1,11 @@
 import React, { useState, useContext } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform } from "react-native";
 import { AuthContext } from "../navigation/AuthContext"; 
-import * as Google from "expo-auth-session/providers/google";
-import { BASE } from "../navigation/api";  // correct relative path
+import { BASE } from "../navigation/api";
+import { Ionicons } from "@expo/vector-icons";
 
-// Helper function to replace alert() with console log messages
 const showMessage = (message) => {
     console.log(`[USER MESSAGE] ${message}`);
-    // NOTE: In a finished app, replace this with a custom Toast or Modal component.
 };
 
 export default function LoginScreen({ navigation }) {
@@ -27,8 +24,6 @@ export default function LoginScreen({ navigation }) {
             const data = await res.json();
 
             if (res.ok && data.session) {
-                // fetch full user profile after successful login
-                
                 const userRes = await fetch(`${BASE}/auth/user/${data.session.user_id}`);
                 const userData = await userRes.json();
 
@@ -37,15 +32,12 @@ export default function LoginScreen({ navigation }) {
                     user: userData, 
                 });
                 
-                // Replaced alert()
                 showMessage("Login successful!");
             } else {
-                // Replaced alert()
                 showMessage(data.detail || data.error || "Invalid credentials");
             }
         } catch (err) {
             console.error("Login error:", err);
-            // Replaced alert()
             showMessage("Error connecting to server");
         }
     };
@@ -56,9 +48,10 @@ export default function LoginScreen({ navigation }) {
             behavior={Platform.OS === "ios" ? "padding" : "height"}
         >
             <View style={styles.header}>
+                <View style={{ width: 24 }} /> 
                 <Text style={styles.logo}>VROOM</Text>
                 <TouchableOpacity style={styles.helpButton}>
-                    <Text style={styles.helpText}>?</Text>
+                    <Ionicons name="help-circle-outline" size={24} color="#fff" />
                 </TouchableOpacity>
             </View>
 
@@ -71,8 +64,7 @@ export default function LoginScreen({ navigation }) {
                         style={styles.input}
                         value={email}
                         onChangeText={setEmail}
-                        placeholder="Enter your email"
-                        placeholderTextColor="#666"
+                        placeholderTextColor="#6b7280"
                         keyboardType="email-address"
                         autoCapitalize="none"
                     />
@@ -82,8 +74,7 @@ export default function LoginScreen({ navigation }) {
                         style={styles.input}
                         value={password}
                         onChangeText={setPassword}
-                        placeholder="Enter your password"
-                        placeholderTextColor="#666"
+                        placeholderTextColor="#6b7280"
                         secureTextEntry
                     />
 
@@ -96,7 +87,8 @@ export default function LoginScreen({ navigation }) {
                     </TouchableOpacity>
 
                     <TouchableOpacity style={styles.googleButton}>
-                        <Text style={styles.googleButtonText}>G Sign in with Google</Text>
+                        <Ionicons name="logo-google" size={20} color="#fff" style={{ marginRight: 8 }} />
+                        <Text style={styles.googleButtonText}>Sign in with Google</Text>
                     </TouchableOpacity>
 
                     <View style={styles.signupContainer}>
@@ -114,32 +106,24 @@ export default function LoginScreen({ navigation }) {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#1a1a1a",
+        backgroundColor: "#020617",
     },
     header: {
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
         padding: 20,
+        marginTop: 20,
     },
     logo: {
-        fontSize: 24,
-        fontWeight: "700",
+        fontSize: 16,
         color: "#fff",
+        fontFamily: "SpaceGrotesk_700Bold",
+        letterSpacing: 1,
     },
     helpButton: {
-        width: 32,
-        height: 32,
-        borderRadius: 16,
-        borderWidth: 2,
-        borderColor: "#fff",
         justifyContent: "center",
         alignItems: "center",
-    },
-    helpText: {
-        fontSize: 18,
-        color: "#fff",
-        fontWeight: "700",
     },
     content: {
         flex: 1,
@@ -148,69 +132,77 @@ const styles = StyleSheet.create({
     },
     title: {
         fontSize: 28,
-        fontWeight: "700",
         color: "#fff",
         marginBottom: 40,
         textAlign: "center",
+        fontFamily: "SpaceGrotesk_700Bold",
     },
     form: {
         width: "100%",
     },
     label: {
         fontSize: 14,
-        color: "#fff",
+        color: "#9ca3af",
         marginBottom: 8,
         marginTop: 16,
+        fontFamily: "SpaceGrotesk_400Regular",
     },
     input: {
-        backgroundColor: "#2a2a2a",
+        backgroundColor: "#111827",
         borderRadius: 12,
         padding: 16,
         color: "#fff",
         fontSize: 16,
+        borderWidth: 1,
+        borderColor: "#1f2937",
+        fontFamily: "SpaceGrotesk_400Regular",
     },
     loginButton: {
-        backgroundColor: "#FFC107",
+        backgroundColor: "#FACC15",
+        borderRadius: 12,
+        padding: 16,
+        alignItems: "center",
+        marginTop: 32,
+    },
+    loginButtonText: {
+        fontSize: 16,
+        color: "#020617",
+        fontFamily: "SpaceGrotesk_700Bold",
+    },
+    forgotPassword: {
+        color: "#9ca3af",
+        textAlign: "center",
+        marginTop: 16,
+        fontSize: 14,
+        fontFamily: "SpaceGrotesk_400Regular",
+    },
+    googleButton: {
+        backgroundColor: "#1f2937",
         borderRadius: 12,
         padding: 16,
         alignItems: "center",
         marginTop: 24,
-    },
-    loginButtonText: {
-        fontSize: 16,
-        fontWeight: "700",
-        color: "#000",
-    },
-    forgotPassword: {
-        color: "#fff",
-        textAlign: "center",
-        marginTop: 16,
-        fontSize: 14,
-    },
-    googleButton: {
-        backgroundColor: "#2a2a2a",
-        borderRadius: 12,
-        padding: 16,
-        alignItems: "center",
-        marginTop: 16,
+        flexDirection: "row",
+        justifyContent: "center",
     },
     googleButtonText: {
         fontSize: 16,
-        fontWeight: "600",
         color: "#fff",
+        fontFamily: "SpaceGrotesk_700Bold",
     },
     signupContainer: {
         flexDirection: "row",
         justifyContent: "center",
-        marginTop: 24,
+        marginTop: 40,
     },
     signupText: {
-        color: "#999",
+        color: "#9ca3af",
         fontSize: 14,
+        fontFamily: "SpaceGrotesk_400Regular",
     },
     signupLink: {
-        color: "#FFC107",
+        color: "#FACC15",
         fontSize: 14,
-        fontWeight: "700",
+        fontFamily: "SpaceGrotesk_700Bold",
     },
 });

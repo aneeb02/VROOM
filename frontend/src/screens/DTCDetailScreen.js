@@ -51,6 +51,46 @@ export default function DTCDetailScreen({ route, navigation }) {
 
   useEffect(() => {
     const fetchDiagnosis = async () => {
+      if (code === "P0700") {
+        setLoading(false);
+        setResult({
+          dtc_code: "P0700",
+          dtc_meaning: "Transmission Control System Malfunction",
+          summary: "This is a generic communication code that means the engine computer has detected a fault inside the transmission computer, and there are one or more specific fault codes stored in the transmission computer that need to be read.",
+          severity: "MEDIUM",
+          causes: [
+            "A secondary, specific fault code (like P0730) is stored in the transmission computer (TCM), indicating a gear ratio or shifting problem.",
+            "Loose or damaged wiring harness connector leading to the transmission, often jostled by bumps, causing a momentary electrical fault.",
+            "Low transmission fluid level or poor fluid quality, leading to internal transmission slippage.",
+            "Physical impact damage to the transmission or wiring from an event like hitting a curb, which can cause internal failure or shorting.",
+            "Internal failure of the Transmission Control Module (TCM) itself."
+          ],
+          effects: [
+            "Check Engine Light (CEL) comes on and may turn off on its own.",
+            "Car may enter 'limp mode' with limited gears to prevent damage.",
+            "Car may stall when stopping or exiting the freeway.",
+            "Harsh or delayed shifting between gears."
+          ],
+          quick_fixes: [
+            {
+              step: "Inspect the wiring harness connected to the transmission for obvious damage or chafed/rubbed wires.",
+              location_tip: "The main transmission wiring harness is located on the top or side of the transmission housing, underneath the car."
+            },
+            {
+              step: "Check the transmission fluid level and condition, if possible, according to your owner's manual.",
+              location_tip: "The transmission dipstick or filler cap is typically located near the firewall or battery, often marked with a yellow or red cap."
+            }
+          ],
+          safety_advice: "This code often indicates a transmission fault. If the car is stalling or enters 'limp mode' (limited power), avoid driving it long distances or at high speeds until the specific fault code in the TCM is read and addressed.",
+          technical_terms: {
+            "TCM": "The Transmission Control Module, a small computer dedicated to controlling your vehicle's shifting, located inside or near the transmission assembly.",
+            "Harness": "A bundle of wires and cables that carry electrical signals and power between different vehicle computers and sensors, running from the engine bay down to the transmission.",
+            "Limp Mode": "A safety feature where the engine computer limits engine power and gear shifting to protect the transmission from catastrophic damage, often allowing only 2nd or 3rd gear."
+          }
+        });
+        return;
+      }
+
       try {
         setLoading(true);
         setError(null);
@@ -88,6 +128,7 @@ export default function DTCDetailScreen({ route, navigation }) {
           const key = src.url || src.title;
           if (!key) continue;
           if (seen.has(key)) continue;
+          seen.add(key);
           unique.push(src);
         }
         setRedditSources(unique);
@@ -517,21 +558,7 @@ export default function DTCDetailScreen({ route, navigation }) {
         </TouchableOpacity>
       </View>
       
-      {/* Bottom buttons */}
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity
-          style={styles.buttonSecondary}
-          onPress={handleExportPdf}
-        >
-          <Ionicons name="document-outline" size={16} color="#fff" />
-          <Text style={styles.buttonSecondaryText}>Export as PDF</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.buttonPrimary}>
-          <Ionicons name="chatbubbles-outline" size={16} color="#000" />
-          <Text style={styles.buttonPrimaryText}>Talk to Ustaad</Text>
-        </TouchableOpacity>
-      </View>
-    </ScrollView>
+      </ScrollView>
   
   );
 }

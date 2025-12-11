@@ -14,10 +14,13 @@ import {
   LiveKitRoom,
   useRoomContext,
   useConnectionState,
-  ConnectionState,
   RoomAudioRenderer,
   AudioSession,
 } from '@livekit/react-native';
+
+import { ConnectionState } from 'livekit-client';
+
+
 
 const API_BASE_URL = "https://lavina-oilfired-possessively.ngrok-free.dev";
 

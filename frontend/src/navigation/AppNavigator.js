@@ -225,7 +225,7 @@ export default function AppNavigator() {
             <NavigationContainer>
                 <Stack.Navigator screenOptions={{ headerShown: false }}>
                     {/* Authentication Flow */}
-                    {!isAuthenticated ? (
+                    {false ? (
                         <>
                             <Stack.Screen name="Login" component={LoginScreen} />
                             <Stack.Screen name="Signup" component={SignupScreen} />

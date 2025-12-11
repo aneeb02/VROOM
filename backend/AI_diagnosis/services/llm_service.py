@@ -6,13 +6,11 @@ from AI_diagnosis.models.request_response import LLMResponse,QuickFix
 from AI_diagnosis.prompts.template import build_prompt
 from dotenv import load_dotenv
 
-
-
 logger = logging.getLogger("llm_service")
 load_dotenv()
 
-GROQ_API_KEY = os.getenv("GROQ_API_KEY")
-GROQ_MODEL   = os.getenv("GROQ_MODEL")
+GROQ_API_KEY = os.getenv("GROQ_API_KEY", "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")
+GROQ_MODEL   = os.getenv("GROQ_MODEL",   "qwen/qwen3-32b")
 
 client = Groq(api_key=GROQ_API_KEY)
 

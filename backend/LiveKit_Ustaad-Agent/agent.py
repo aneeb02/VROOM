@@ -9,6 +9,7 @@ from livekit.plugins import (
     upliftai,
     silero,
 )
+
 import os
 from livekit.plugins import openai as lk_openai
 from livekit.plugins.turn_detector.multilingual import MultilingualModel
@@ -102,6 +103,6 @@ if __name__ == "__main__":
     import os
     
     agents.cli.run_app(agents.WorkerOptions(
-        entrypoint_fnc=entrypoint,
-        initialize_process_timeout=60,
-    ))
+    entrypoint_fnc=entrypoint,
+    initialize_process_timeout=180,
+))

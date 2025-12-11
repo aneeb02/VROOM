@@ -8,7 +8,7 @@ class RAGService:
 
 
 
-    def retrieve(self, dtc: str, query: str, top_k: int = 15) -> Tuple[str, List[Dict[str, Any]]]:
+    def retrieve(self, dtc: str, query: str, top_k: int = 12) -> Tuple[str, List[Dict[str, Any]]]:
         """
         HYBRID STRATEGY:
         1) First, get posts whose metadata.dtc == dtc (keyword / structured).

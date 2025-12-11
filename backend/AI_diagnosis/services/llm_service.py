@@ -2,17 +2,23 @@ import os,asyncio,json
 from groq import Groq,BadRequestError
 from typing import Optional
 import logging
-from AI_diagnosis.models.request_response import LLMResponse
+from AI_diagnosis.models.request_response import LLMResponse,QuickFix
 from AI_diagnosis.prompts.template import build_prompt
 from dotenv import load_dotenv
+
+
+
 logger = logging.getLogger("llm_service")
 load_dotenv()
-GROQ_API_KEY = os.getenv("GROQ_API_KEY", "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")
-GROQ_MODEL   = os.getenv("GROQ_MODEL",   "openai/gpt-oss-20b")
-client = Groq(api_key=GROQ_API_KEY)
-REQUEST_TIMEOUT = 20
-async def call_groq(catalogue: dict, reddit: str, vehicle: dict, pid: dict) -> Optional[LLMResponse]:
 
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+GROQ_MODEL   = os.getenv("GROQ_MODEL")
+
+client = Groq(api_key=GROQ_API_KEY)
+
+REQUEST_TIMEOUT = 20
+
+async def call_groq(catalogue: dict, reddit: str, vehicle: dict, pid: dict) -> Optional[LLMResponse]:
     try:
 
         prompt = build_prompt(catalogue, reddit, vehicle, pid)
@@ -29,7 +35,7 @@ async def call_groq(catalogue: dict, reddit: str, vehicle: dict, pid: dict) -> O
                 model=GROQ_MODEL,
                 messages=messages,
                 temperature=0.0,
-                max_tokens=1200,
+                max_tokens=2048,
                 presence_penalty=0.0,
                 response_format={"type": "json_object"},
             )
@@ -55,7 +61,7 @@ async def call_groq(catalogue: dict, reddit: str, vehicle: dict, pid: dict) -> O
         code = catalogue.get("code")
         desc = catalogue.get("description")
 
-        # Always ensure dtc_code is set to the actual code string
+        # Aensure dtc_code is set to the actual code string
         if code:
             llm.dtc_code = code
         else:
@@ -80,10 +86,11 @@ async def call_groq(catalogue: dict, reddit: str, vehicle: dict, pid: dict) -> O
                     model=GROQ_MODEL,
                     messages=messages,
                     temperature=0.0,
-                    max_tokens=1200,
+                    max_tokens=2048,
                 )
                 text = fallback.choices[0].message.content
-                json_start, json_end = text.find("{"), text.rfind("}")
+                cleaned_text = text.strip()
+                json_start, json_end = cleaned_text.find("{"), cleaned_text.rfind("}")
                 if json_start != -1 and json_end != -1:
                     snippet = text[json_start:json_end + 1]
                     llm = LLMResponse.model_validate_json(snippet)

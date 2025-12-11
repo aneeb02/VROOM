@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException,status
 from sqlalchemy.ext.asyncio import AsyncSession
-from AI_diagnosis.models.request_response import DiagnoseRequest, DiagnoseResponse, LLMResponse
+from AI_diagnosis.models.request_response import DiagnoseRequest, DiagnoseResponse, LLMResponse,QuickFix
 from AI_diagnosis.services.diagnosis_service import DiagnosisService
 from AI_diagnosis.db.db_engine import get_supabase
 from supabase import Client
@@ -31,6 +31,7 @@ async def diagnose(req: DiagnoseRequest, client: Client = Depends(get_session)):
         result = await svc.run(req.dtc, req.vehicle.model_dump(), req.vehicle.pid_snapshot)
         sources = result.get("sources", [])
         llm_resp = result.get("llm")
+        catalogue_discussion = result.get("catalogue_links",[])
 
         # If the LLM failed to respond or returned invalid JSON
         if not llm_resp:
@@ -42,13 +43,18 @@ async def diagnose(req: DiagnoseRequest, client: Client = Depends(get_session)):
                 severity="LOW",
                 causes=["Incomplete context or model timeout."],
                 effects=["Unable to analyze current vehicle data."],
-                quick_fixes=["Try again later or verify DTC code and PID snapshot."],
-                safety_advice="If the warning light stays on or the car behaves abnormally, have it inspected by a qualified technician."
+                quick_fixes=[QuickFix( # FIX: Use QuickFix model with structured data
+                    step="Try again later or verify DTC code and PID snapshot.",
+                    location_tip="This is a general troubleshooting suggestion and does not apply to a specific part."
+                )],
+
+                safety_advice="If the warning light stays on or the car behaves abnormally, have it inspected by a qualified technician.",
+                technical_terms={}
             )
             return DiagnoseResponse(vehicle=req.vehicle, results=[fallback])
 
         # Successful response
-        return DiagnoseResponse(vehicle=req.vehicle, results=[llm_resp],reddit_sources=sources)
+        return DiagnoseResponse(vehicle=req.vehicle, results=[llm_resp],reddit_sources=sources, dtc_catalogue_links=catalogue_discussion)
 
     except HTTPException:
         # Already a handled FastAPI error

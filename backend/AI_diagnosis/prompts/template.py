@@ -40,8 +40,18 @@ Never omit a key.
   "summary": "1–2 sentence plain-English description of what the code indicates on this vehicle",
   "causes": ["3–6 realistic probable root causes, ordered by likelihood"],
   "effects": ["driver-noticeable symptoms or system effects"],
-  "quick_fixes": ["fast, low-risk things a user can try safely before a shop visit"],
-  "safety_advice": "short statement on drivability and urgency"
+  "effects": ["driver-noticeable symptoms or system effects"],
+  "quick_fixes": [
+    {{
+      "step": "string",
+      "location_tip": "string"
+    }}
+  ],
+  "safety_advice": "short statement on drivability and urgency",
+  "technical_terms": {{
+    "term1": "plain-english definition/explanation, e.g., 'PCM'",
+    "term2": "definition/explanation, e.g., 'Oxygen Sensor'"
+  }}
 }}
 ### Field guidance
 - **severity**:
@@ -51,8 +61,8 @@ Never omit a key.
   - critical: stop driving / safety risk
 - **causes**: focus on root mechanical/electrical issues; avoid vague items like "sensor failure".
 - **effects**: list observable symptoms 
-- **quick_fixes**: strictly low-risk actions (e.g., reseat connector, inspect for obvious leaks, clear ice/debris, tighten fuel cap); avoid anything unsafe or tool-intensive.
-
+- **quick_fixes**: strictly low-risk actions (e.g., reseat connector, inspect for obvious leaks, clear ice/debris, tighten fuel cap); avoid anything unsafe or tool-intensive. For the 'location_tip', provide a clear, easy-to-understand physical location description, relative to common landmarks (e.g., "The sensor is located underneath the car, behind the engine, bolted to the exhaust pipe.").
+- **technical_terms**: Identify all key technical or component terms (e.g., PCM, O₂ sensor, Catalyst, Bank 2) used in the 'summary', 'causes', or 'quick_fixes'. The value for each term MUST be a clear, non-technical explanation that **explicitly mentions where that component is physically located in the vehicle** (e.g., "The sensor is usually screwed into the exhaust pipe before the main muffler.").
     """.strip()
 
     vehicle_info = f"{vehicle.get('make', 'Unknown')} {vehicle.get('model', '')} ({vehicle.get('year', 'N/A')})"

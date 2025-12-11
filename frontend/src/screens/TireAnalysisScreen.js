@@ -116,18 +116,17 @@ const TireAnalysisScreen = () => {
       // This depends on your model's exact input requirements
       const pixelArray = new Float32Array(224 * 224 * 3);
 
-      // Fill with normalized pixel values (0-1 range)
+      // Fill with normalized pixel values (-1.0 to 1.0 range)
       // jpeg-js returns RGBA (4 bytes per pixel)
       // We need RGB (3 floats per pixel)
       const { data } = rawImageData;
       let pixelIndex = 0;
 
       for (let i = 0; i < data.length; i += 4) {
-        // Normalize 0-255 -> -1.0 to 1.0
-        // Formula: (value - 127.5) / 127.5
-        pixelArray[pixelIndex] = (data[i] - 127.5) / 127.5;     // R
-        pixelArray[pixelIndex + 1] = (data[i + 1] - 127.5) / 127.5; // G
-        pixelArray[pixelIndex + 2] = (data[i + 2] - 127.5) / 127.5; // B
+       
+        pixelArray[pixelIndex] = data[i] / 255.0;     // R
+        pixelArray[pixelIndex + 1] = data[i + 1] / 255.0; // G
+        pixelArray[pixelIndex + 2] = data[i + 2] / 255.0; // B
         
         pixelIndex += 3;
       }
@@ -164,29 +163,25 @@ const TireAnalysisScreen = () => {
       const outputs = await modelRef.current.run([inputArray]);
       
       console.log("Raw Output:", outputs);
-
-      // Process results based on model output structure
-      // The model returns a SINGLE value (e.g., [0.53])
-      // We assume this is a "Quality Score" where 1.0 is Good and 0.0 is Poor.
-      const resultData = outputs[0];
-      const score = resultData[0];
       
-      let quality = 'fair';
-      if (score > 0.7) quality = 'good';
-      else if (score < 0.4) quality = 'poor';
+      const resultData = outputs[0];
+      const goodProbability = resultData[0]; 
+      
+      const threshold = 0.7;
+      const quality = goodProbability >= threshold ? 'good' : 'poor';
 
-      // Create synthetic scores for the UI visualization
-      // (Since we only have one real number, we infer the others)
+      // FIX: Create only binary scores for the UI visualization
+      const confidence = quality === 'good' ? goodProbability : 1 - goodProbability;
+      
       const qualityScores = {
-        good: score,
-        fair: 1 - Math.abs(score - 0.5) * 2, // Peaks at 0.5
-        poor: 1 - score,
+        good: goodProbability,
+        poor: 1 - goodProbability,
       };
 
       setAnalysisResult({
         quality,
         scores: qualityScores,
-        confidence: score, // Use the raw score as confidence/quality metric
+        confidence: confidence, 
       });
     } catch (error) {
       console.error('Analysis failed:', error);
@@ -201,8 +196,6 @@ const TireAnalysisScreen = () => {
     switch (quality) {
       case 'good':
         return '#4CAF50';
-      case 'fair':
-        return '#FFC107';
       case 'poor':
         return '#f44336';
       default:
@@ -214,8 +207,6 @@ const TireAnalysisScreen = () => {
     switch (quality) {
       case 'good':
         return 'Your tire is in good condition. No immediate action is required.';
-      case 'fair':
-        return 'Your tire shows signs of wear. Consider inspection by a mechanic.';
       case 'poor':
         return 'Your tire requires immediate attention. Replacement may be needed.';
       default:
@@ -340,6 +331,7 @@ const TireAnalysisScreen = () => {
           {/* Scores Breakdown */}
           <View style={styles.scoresContainer}>
             <Text style={styles.scoresTitle}>Quality Scores</Text>
+            {/* The Object.entries here will now only iterate over 'good' and 'poor' */}
             {Object.entries(analysisResult.scores).map(([key, value]) => (
               <View key={key} style={styles.scoreItem}>
                 <Text style={styles.scoreLabel}>
